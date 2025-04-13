@@ -4,15 +4,15 @@ import psycopg2
 
 fake = Faker('pt_BR')
 
-NUM_PROFESSORES = 15
-NUM_ALUNOS = 50
+NUM_PROFESSORES = 30
+NUM_ALUNOS = 110
 MAX_ALUNOS_POR_TCC = 4
-MAX_DISCIPLINAS_POR_CURSO = 7
-MAX_DISCIPLINAS_POR_SEMESTRE = 2
+MAX_DISCIPLINAS_POR_SEMESTRE = 7
 SEMESTRE_PARA_TCC = 8
-INICIO_INTERVALO_ANO = 2018
+INICIO_INTERVALO_ANO = 2016
 FINAL_INTERVALO_ANO = 2025
 FINAL_INTERVALO_SEMESTRE = 8
+
 TEMAS_TCC = [
     "machine learning", "blockchain", "IoT", "nuvem", "big data",
     "segurança cibernética", "LGPD", "inteligência artificial", "devops"
@@ -28,9 +28,9 @@ DEPARTAMENTOS = {
     '7': 'Ciências Sociais e Jurídicas', 
 }
 DISCIPLINAS = {
-    '1': ['Algoritmos e Programação', 'Estrutura de Dados', 'Inteligência Artificial', 'Redes de Computadores', 'Banco de Dados', 'Engenharia de Software', 'Sistemas Operacionais', 'Computação Gráfica', 'Segurança da Informação', 'Programação Web', 'Machine Learning', 'Arquitetura de Computadores','Linguagens Formais e Atomicas'],
+    '1': ['Algoritmos e Programação', 'Estrutura de Dados', 'Inteligência Artificial', 'Redes de Computadores', 'Banco de Dados', 'Engenharia de Software', 'Sistemas Operacionais', 'Computação Gráfica', 'Segurança da Informação', 'Programação Web', 'Machine Learning', 'Arquitetura de Computadores'],
     '2': ['Cálculo Diferencial e Integral', 'Álgebra Linear', 'Matemática Discreta', 'Cálculo Numérico', 'Equações Diferenciais', 'Probabilidade e Estatística', 'Geometria Analítica', 'Teoria dos Grafos', 'Otimização Matemática', 'Matemática Financeira'],
-    '3': ['Língua Portuguesa', 'Inglês Técnico', 'Literatura Brasileira', 'Espanhol', 'Comunicação Científica'],
+    '3': ['Língua Portuguesa', 'Inglês Técnico', 'Literatura Brasileira', 'Espanhol Instrumental', 'Comunicação Científica'],
     '4': ['Circuitos Elétricos', 'Eletrônica Digital', 'Sistemas de Controle', 'Eletrônica Analógica', 'Microcontroladores', 'Telecomunicações', 'Robótica Industrial', 'Automação', 'Processamento Digital de Sinais', 'Instalações Elétricas'],
     '5': ['Física Geral', 'Mecânica Clássica', 'Eletromagnetismo', 'Termodinâmica', 'Física Moderna', 'Fisica Óptica', 'Física Computacional'],
     '6': ['Química Geral', 'Química Orgânica', 'Físico-Química', 'Química Inorgânica'],
@@ -40,23 +40,45 @@ CURSOS = {
     '1': 'Ciência da Computação',   
     '2': 'Engenharia de Dados', 
     '3': 'Sistemas de Informação',
-    '4': 'Engenharia Mecatrônica',
+    '4': 'Ciência de Dados',
     '5': 'Engenharia de Produção'
 }
+#Funcoes auxiliares------------------------------------------
+def gerar_nome():
+    return f"{fake.first_name()} {fake.last_name()}"
 
+
+def dividir_em_grupos(alunos, tamanho_grupo=4):
+    grupos = []
+    i = 0
+    while i < len(alunos):
+        grupo = alunos[i:i + tamanho_grupo]
+        grupos.append(grupo)
+        i += tamanho_grupo
+    return grupos
+
+def avancar_semestre(data_semestre):
+    ano, semestre = map(int, str(data_semestre).split('.'))
+    if semestre == 1:
+        semestre = 2
+    else:
+        semestre = 1
+        ano += 1
+    return f"{ano}.{semestre}"
+##-----------------------------------------------------------
 def gerar_professores():
     professores = []
     departamentos = list(DEPARTAMENTOS.keys())
     pesos = [9, 9, 4, 7, 3, 2, 1]
     id_prof = 1 
     for id_departamento in departamentos:
-        professores.append((id_prof, fake.name(), id_departamento))
+        professores.append((id_prof, gerar_nome(), id_departamento))
         id_prof += 1
 
     restante = NUM_PROFESSORES - len(professores)
     for _ in range(restante):
         id_departamento = random.choices(departamentos, weights=pesos, k=1)[0]
-        professores.append((id_prof, fake.name(), id_departamento))
+        professores.append((id_prof, gerar_nome(), id_departamento))
         id_prof += 1
 
     return professores
@@ -66,8 +88,9 @@ def gerar_alunos():
     alunos = []
     for ra in range(1, NUM_ALUNOS + 1):
         id_curso = random.choice(list(CURSOS.keys()))
-        alunos.append((ra, fake.name(), id_curso))
+        alunos.append((ra, gerar_nome(), id_curso))
     return alunos
+
 
 def gerar_departamentos(professores):
     departamentos = []
@@ -102,50 +125,30 @@ def gerar_disciplinas():
             
 def gerar_curso_disciplina(disciplinas, cursos):
     curso_disciplina = []
-    for id_disciplinas in disciplinas:
-        curso_associado = random.choice(cursos)
-        id_curso_associado = curso_associado[0]
-        id_disciplina = id_disciplinas[0]
-        curso_disciplina.append((id_disciplina,id_curso_associado))
+    for disciplina in disciplinas:
+        n = random.randint(1,5)
+        cursos_associados = random.sample(cursos,n)
+        for curso in cursos_associados:
+            curso_disciplina.append((disciplina[0],curso[0]))
     return curso_disciplina
                 
-import random
-
 def gerar_matriz_curricular(cursos, disciplinas):
     matriz_curricular = []
     for curso in cursos:
-        id_curso = curso[0]  
         disciplinas_curso = disciplinas.copy()
         random.shuffle(disciplinas_curso)
         
         for semestre in range(1, 9):
-            num_disciplinas = random.randint(4, 7)
+            num_disciplinas = random.randint(4, MAX_DISCIPLINAS_POR_SEMESTRE)
            
             for _ in range(num_disciplinas+1):
                 if not disciplinas_curso:
                     break  
                 disciplina = disciplinas_curso.pop()
-                matriz_curricular.append((id_curso, disciplina[0], semestre))
+                matriz_curricular.append((curso[0], disciplina[0], semestre))
     
     return matriz_curricular
 
-def dividir_em_grupos(alunos, tamanho_grupo=4):
-    grupos = []
-    i = 0
-    while i < len(alunos):
-        grupo = alunos[i:i + tamanho_grupo]
-        grupos.append(grupo)
-        i += tamanho_grupo
-    return grupos
-
-def avancar_semestre(data_semestre):
-    ano, semestre = map(int, str(data_semestre).split('.'))
-    if semestre == 1:
-        semestre = 2
-    else:
-        semestre = 1
-        ano += 1
-    return f"{ano}.{semestre}"
 
 def gerar_tccs(professores, escuta):
     id_tcc = 1
@@ -170,7 +173,6 @@ def gerar_tccs(professores, escuta):
             id_professor = random.randint(1, len(professores))
             nota = random.randint(5,10)
             
-                
             tccs.append((
                     id_tcc, 
                     id_professor, 
@@ -178,17 +180,16 @@ def gerar_tccs(professores, escuta):
                     nota,
                     semestre
                 ))
-            
 
             id_tcc += 1  
 
     return tccs, tccs_aluno
 
 
-
 def gerar_profere(professores, disciplinas, escuta):
     profere = set()
     mapa_disc_depto = {d[0]: d[2] for d in disciplinas}
+    
     for entrada in escuta:
         _, id_disc, semestre, _, _ = entrada
         id_depto = mapa_disc_depto.get(id_disc)
@@ -203,16 +204,16 @@ def gerar_profere(professores, disciplinas, escuta):
     
     return list(profere)
 
-def dividir_em_grupos(alunos, tamanho_grupo=MAX_ALUNOS_POR_TCC):
-    random.shuffle(alunos)
-    return [alunos[i:i + tamanho_grupo] for i in range(0, len(alunos), tamanho_grupo)]
-
-
 def gerar_escuta(alunos, cursos_disciplinas):
     aluno_disciplina = []
     for aluno in alunos:
-        semestre_aluno = random.randint(1, FINAL_INTERVALO_SEMESTRE)
         ano_atual = random.randint(INICIO_INTERVALO_ANO,FINAL_INTERVALO_ANO)
+        
+        if ano_atual >= INICIO_INTERVALO_ANO+4:
+            ciclo_aluno = 1
+        else:
+            ciclo_aluno = random.randint(1, FINAL_INTERVALO_SEMESTRE)
+            
         semestre_atual = 1
         ra, nome, curso_id = aluno
         disciplinas_reprovadas = []
@@ -221,11 +222,11 @@ def gerar_escuta(alunos, cursos_disciplinas):
         while ano_atual != 2025 or semestre_atual != 2:
             disciplinas_semestre = []
             novas_reprovadas = []
-            if semestre_aluno >= 8 and (not disciplinas_reprovadas or disciplinas_semestre):
+            if ciclo_aluno >= 8 and (not disciplinas_reprovadas or disciplinas_semestre):
                 break
             
             for d in cursos_disciplinas:
-                if d[0] == curso_id and semestre_aluno == d[2]:
+                if d[0] == curso_id and ciclo_aluno == d[2]:
                     if d[1] not in disciplinas_concluidas:
                         disciplinas_semestre.append(d[1])
 
@@ -236,7 +237,7 @@ def gerar_escuta(alunos, cursos_disciplinas):
             for d in disciplinas_semestre:
                 nota = min(10, max(0, round(random.normalvariate(6, 1), 2)))
                 semestre_formatado = f"{ano_atual}.{semestre_atual}"
-                aluno_disciplina.append((ra, d, semestre_formatado, nota, semestre_aluno))
+                aluno_disciplina.append((ra, d, semestre_formatado, nota, ciclo_aluno))
 
                 if nota < 5:
                     novas_reprovadas.append(d)
@@ -250,7 +251,7 @@ def gerar_escuta(alunos, cursos_disciplinas):
             else:
                 semestre_atual = 1
                 ano_atual += 1
-            semestre_aluno += 1
+            ciclo_aluno += 1
 
     return aluno_disciplina
 
@@ -266,14 +267,12 @@ def inserir_no_banco(dados):
         )
         cursor = conn.cursor()
 
-        
         tabelas = [
             "tcc_aluno", "tcc", "profere", "escuta", "matriz_curricular", "curso_disciplina",
             "disciplina", "aluno", "curso", "professor", "departamento"
         ]
         for tabela in tabelas:
             cursor.execute(f"DROP TABLE IF EXISTS {tabela} CASCADE;")
-
         
         comandos_sql = [
 
@@ -387,31 +386,26 @@ def inserir_no_banco(dados):
             );
             """
         ]
-
+        
         for comando in comandos_sql:
             cursor.execute(comando)
-
-        
+        print("Tabelas Criadas.")
         cursor.executemany("INSERT INTO professor VALUES (%s, %s, %s)", dados['professores'])
-        print("p")
         cursor.executemany("INSERT INTO departamento VALUES (%s, %s, %s)", dados['departamentos'])
-        print("d")
         cursor.executemany("INSERT INTO curso VALUES (%s, %s, %s)", dados['cursos'])
-        print("c")
+        print("Professores, departamentos e cursos inseridos.")
         cursor.executemany("INSERT INTO aluno VALUES (%s, %s, %s)", dados['alunos'])
         cursor.executemany("INSERT INTO disciplina VALUES (%s, %s, %s)", dados['disciplinas'])
         cursor.executemany("INSERT INTO curso_disciplina VALUES (%s, %s)", dados['curso_disciplina'])
+        print("Alunos, Disciplinas e curso_disciplina inseridos.")
         cursor.executemany("INSERT INTO matriz_curricular VALUES (%s, %s, %s)", dados['matriz_curricular'])
         cursor.executemany("INSERT INTO escuta VALUES (%s, %s, %s, %s, %s)", dados['escuta'])
-        print("e")
         cursor.executemany("INSERT INTO profere VALUES (%s, %s, %s)", dados['profere'])
-        print("prof")
+        print("Matriz_Curricular, Escuta e Profere inseridos.")
         cursor.executemany("INSERT INTO tcc VALUES (%s, %s, %s, %s, %s)", dados['tccs'])
-        print("tc")
         cursor.executemany("INSERT INTO tcc_aluno VALUES (%s, %s)", dados['tcc_aluno'])
-        print("tca")
+        print("TCCs e TCC_aluno inserido")
         conn.commit()
-        print("Dados inseridos!")
 
     except Exception as e:
         print(f"Erro: {e}")
@@ -423,6 +417,7 @@ def inserir_no_banco(dados):
 
 
 def main():
+    
     disciplinas = gerar_disciplinas()
     professores = gerar_professores()
     alunos = gerar_alunos()
@@ -433,7 +428,6 @@ def main():
     escuta = gerar_escuta(alunos, matriz_curricular)
     profere = gerar_profere(professores, disciplinas,escuta)
     tccs, tcc_aluno = gerar_tccs(professores, escuta)
-
     dados = {
         'professores': professores,
         'alunos': alunos,
