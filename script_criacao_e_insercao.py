@@ -4,12 +4,12 @@ import psycopg2
 
 fake = Faker('pt_BR')
 
-NUM_PROFESSORES = 30
-NUM_ALUNOS = 110
+NUM_PROFESSORES = 15
+NUM_ALUNOS = 60
 MAX_ALUNOS_POR_TCC = 4
 MAX_DISCIPLINAS_POR_SEMESTRE = 7
 SEMESTRE_PARA_TCC = 8
-INICIO_INTERVALO_ANO = 2016
+INICIO_INTERVALO_ANO = 2018
 FINAL_INTERVALO_ANO = 2025
 FINAL_INTERVALO_SEMESTRE = 8
 
@@ -188,22 +188,31 @@ def gerar_tccs(professores, escuta):
 
 def gerar_profere(professores, disciplinas, escuta):
     profere = set()
-    mapa_disc_depto = {d[0]: d[2] for d in disciplinas}
+    mapa_disc_depto = {d[0]: d[2] for d in disciplinas}  
+    disc_semestre_processados = set()  
     
     for entrada in escuta:
         _, id_disc, semestre, _, _ = entrada
-        id_depto = mapa_disc_depto.get(id_disc)
-        profs_do_depto = [p for p in professores if p[2] == id_depto]
+        chave = (id_disc, semestre)
         
+        if chave in disc_semestre_processados:
+            continue
+        
+        id_depto = mapa_disc_depto.get(id_disc)
+        if id_depto is None:
+            continue
+            
+        profs_do_depto = [p[0] for p in professores if p[2] == id_depto]
         if not profs_do_depto:
             continue
         
         prof_escolhido = random.choice(profs_do_depto)
-        id_prof = prof_escolhido[0]
-        profere.add((id_prof, id_disc, semestre))
+        profere.add((prof_escolhido, id_disc, semestre))
+        
+        disc_semestre_processados.add(chave)
     
     return list(profere)
-
+    
 def gerar_escuta(alunos, cursos_disciplinas):
     aluno_disciplina = []
     for aluno in alunos:
@@ -217,7 +226,7 @@ def gerar_escuta(alunos, cursos_disciplinas):
         semestre_atual = 1
         ra, nome, curso_id = aluno
         disciplinas_reprovadas = []
-        disciplinas_concluidas = set()
+        disciplinas_concluidas = []
 
         while ano_atual != 2025 or semestre_atual != 2:
             disciplinas_semestre = []
@@ -242,7 +251,7 @@ def gerar_escuta(alunos, cursos_disciplinas):
                 if nota < 5:
                     novas_reprovadas.append(d)
                 else:
-                    disciplinas_concluidas.add(d) 
+                    disciplinas_concluidas.append(d) 
 
             disciplinas_reprovadas = novas_reprovadas
 
