@@ -28,13 +28,13 @@ DEPARTAMENTOS = {
     '7': 'Ciências Sociais e Jurídicas', 
 }
 DISCIPLINAS = {
-    '1': ['Algoritmos e Programação', 'Estrutura de Dados', 'Inteligência Artificial', 'Redes de Computadores', 'Banco de Dados', 'Engenharia de Software', 'Sistemas Operacionais', 'Computação Gráfica', 'Segurança da Informação', 'Programação Web', 'Machine Learning', 'Arquitetura de Computadores'],
-    '2': ['Cálculo Diferencial e Integral', 'Álgebra Linear', 'Matemática Discreta', 'Cálculo Numérico', 'Equações Diferenciais', 'Probabilidade e Estatística', 'Geometria Analítica', 'Teoria dos Grafos', 'Otimização Matemática', 'Matemática Financeira'],
-    '3': ['Língua Portuguesa', 'Inglês Técnico', 'Literatura Brasileira', 'Espanhol Instrumental', 'Comunicação Científica'],
+    '1': ['Algoritmos e Programação', 'Estrutura de Dados', 'Inteligência Artificial', 'Redes de Computadores', 'Banco de Dados', 'Engenharia de Software', 'Sistemas Operacionais', 'Computação Gráfica', 'Segurança da Informação', 'Programação Web', 'Machine Learning', 'Arquitetura de Computadores','Design de Games'],
+    '2': ['Cálculo I', 'Álgebra Linear', 'Matemática Discreta', 'Cálculo Numérico', 'Equações Diferenciais', 'Probabilidade e Estatística', 'Geometria Analítica', 'Teoria dos Grafos', 'Otimização Matemática', 'Matemática Financeira','Cálculo II', 'Cálculo III','Cálculo IV'],
+    '3': ['Língua Portuguesa', 'Inglês Técnico', 'Literatura Brasileira', 'Espanhol Instrumental', 'Comunicação Científica','Comunicação e Expressão'],
     '4': ['Circuitos Elétricos', 'Eletrônica Digital', 'Sistemas de Controle', 'Eletrônica Analógica', 'Microcontroladores', 'Telecomunicações', 'Robótica Industrial', 'Automação', 'Processamento Digital de Sinais', 'Instalações Elétricas'],
-    '5': ['Física Geral', 'Mecânica Clássica', 'Eletromagnetismo', 'Termodinâmica', 'Física Moderna', 'Fisica Óptica', 'Física Computacional'],
-    '6': ['Química Geral', 'Química Orgânica', 'Físico-Química', 'Química Inorgânica'],
-    '7': ['Introdução ao Direito', 'Ética Profissional']
+    '5': ['Física Geral', 'Mecânica Clássica', 'Eletromagnetismo', 'Termodinâmica', 'Física Moderna', 'Fisica Óptica', 'Física Computacional','Física I', 'Física II'],
+    '6': ['Química Geral', 'Química Orgânica', 'Físico-Química', 'Química Inorgânica','Química Atômica','Introdução à Química','Estrutura  de compostos orgânicos'],
+    '7': ['Introdução ao Direito', 'Ética Profissional','Filosofia Contemporânea','Ensino Social Cristão','Sociologia','Introdução à literatura sociológica','Filosofia Clássica']
 }
 CURSOS = {
     '1': 'Ciência da Computação',   
@@ -69,7 +69,7 @@ def avancar_semestre(data_semestre):
 def gerar_professores():
     professores = []
     departamentos = list(DEPARTAMENTOS.keys())
-    pesos = [9, 9, 4, 7, 3, 2, 1]
+    pesos = [6, 6, 6, 6, 3, 2, 2]
     id_prof = 1 
     for id_departamento in departamentos:
         professores.append((id_prof, gerar_nome(), id_departamento))
@@ -94,15 +94,17 @@ def gerar_alunos():
 
 def gerar_departamentos(professores):
     departamentos = []
+    profs_escolhidos = set()
     for id_depto in DEPARTAMENTOS.keys():
-        profs = [p for p in professores if p[2] == id_depto]
-        if not profs:
+        profs = {p for p in professores if p[2] == id_depto}
+        if not (profs-profs_escolhidos):
             coordenador = random.choice(professores)
         else:
-            coordenador = random.choice(profs)
+            coordenador = random.choice(list(profs-profs_escolhidos))
         id_coordenador = coordenador[0]
         nome_departamento = DEPARTAMENTOS[id_depto]
         departamentos.append((id_depto, nome_departamento, id_coordenador))
+        profs_escolhidos.add(id_coordenador)
     return departamentos
             
 def gerar_cursos(professores):
@@ -140,8 +142,7 @@ def gerar_matriz_curricular(cursos, disciplinas):
         
         for semestre in range(1, 9):
             num_disciplinas = random.randint(4, MAX_DISCIPLINAS_POR_SEMESTRE)
-           
-            for _ in range(num_disciplinas+1):
+            for _ in range(num_disciplinas):
                 if not disciplinas_curso:
                     break  
                 disciplina = disciplinas_curso.pop()
@@ -231,7 +232,7 @@ def gerar_escuta(alunos, cursos_disciplinas):
         while ano_atual != 2025 or semestre_atual != 2:
             disciplinas_semestre = []
             novas_reprovadas = []
-            if ciclo_aluno >= 8 and (not disciplinas_reprovadas or disciplinas_semestre):
+            if ciclo_aluno > 8 and not disciplinas_reprovadas and  not disciplinas_semestre:
                 break
             
             for d in cursos_disciplinas:
