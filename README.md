@@ -2,9 +2,9 @@
 Projeto para a matéria CC5232-Banco de Dados
 
 Feito por: 
-Juan Manuel Citta 24.123.022-6
-Sebastian Citta 24.123.068-9
-Luis Fernando Souza Goncalves 24.123.052-3
+-Juan Manuel Citta 24.123.022-6
+-Sebastian Citta 24.123.068-9
+-Luis Fernando Souza Goncalves 24.123.052-3
 
 ##Descrição:
 O banco de dados foi projetado para simular um database de uma faculdade.
