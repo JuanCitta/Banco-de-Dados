@@ -1,9 +1,9 @@
-1. Mostre todo o histórico escolar de um aluno que teve reprovação em uma disciplina, retornando inclusive a reprovação em um semestre e a aprovação no semestre seguinte
+1. Mostre todo o histórico escolar de um aluno que teve reprovação em uma disciplina, retornando inclusive a reprovação em um semestre e a aprovação no semestre seguinte.
 SELECT * from escuta
 WHERE ra_aluno = '2'
 ORDER BY  semestre
 
-2. Mostre todos os TCCs orientados por um professor junto com os nomes dos alunos que fizeram o projeto
+2. Mostre todos os TCCs orientados por um professor junto com os nomes dos alunos que fizeram o projeto.
 SELECT 
     p.nome AS Nome do Professor,
     t.id_tcc,
@@ -17,7 +17,7 @@ JOIN tcc_aluno ta ON t.id_tcc = ta.id_tcc
 JOIN aluno a ON ta.ra = a.ra
 ORDER BY p.nome, t.id_tcc, a.nome
 
-3. Mostre a matriz curicular de pelo menos 2 cursos diferentes que possuem disciplinas em comum (e.g., Ciência da Computação e Ciência de Dados). Este exercício deve ser dividido em 2 queries sendo uma para cada curso
+3. Mostre a matriz curicular de pelo menos 2 cursos diferentes que possuem disciplinas em comum (e.g., Ciência da Computação e Ciência de Dados). Este exercício deve ser dividido em 2 queries sendo uma para cada curso.
 Ciência da Computação:
 SELECT 
     c.titulo_curso AS Curso,
@@ -50,7 +50,7 @@ WHERE
 ORDER BY 
     mc.semestre, d.nome_disc
 
-4. Para um determinado aluno, mostre os códigos e nomes das diciplinas já cursadas junto com os nomes dos professores que lecionaram a disciplina para o aluno
+4. Para um determinado aluno, mostre os códigos e nomes das diciplinas já cursadas junto com os nomes dos professores que lecionaram a disciplina para o aluno.
 SELECT 
     d.id_disc AS "Cod. da Disciplina",
     d.nome_disc AS "Nome da Disciplina",
@@ -75,7 +75,7 @@ ORDER BY
 LIMIT 300
 
 5. Liste todos os chefes de departamento e coordenadores de curso em apenas uma query de forma que a primeira coluna seja o nome do professor,
-   a segunda o nome do departamento coordena e a terceira o nome do curso que coordena. Substitua os campos em branco do resultado da query pelo texto "nenhum"
+   a segunda o nome do departamento coordena e a terceira o nome do curso que coordena. Substitua os campos em branco do resultado da query pelo texto "nenhum".
 SELECT 
     p.nome AS "Nome do Prof.",
     COALESCE(depto.nome_depto, 'nenhum') AS "Departamento",
@@ -98,7 +98,7 @@ p.id_prof as "ID do Prof.",
 p.nome as "Nome do Prof."
 FROM professor p
 
-7.Encontre os nomes de todos os estudantes que cursaram "Engenharia de Dados"
+7.Encontre os nomes de todos os estudantes que cursaram 'Engenharia de Dados'.
 SELECT 
     a.nome AS "Nome",
     c.titulo_curso AS "Curso"
@@ -109,7 +109,7 @@ JOIN
 WHERE 
     c.titulo_curso = 'Engenharia de Dados'
 
-8. Liste todas as disciplinas do departamento de "Computação" ou do departamento de "Matemática" que foram cursadas por estudantes 
+8. Liste todas as disciplinas do departamento de 'Computação' ou do departamento de 'Matemática' que foram cursadas por estudantes.
 SELECT DISTINCT
     d.id_disc AS "Código da Disciplina",
     d.nome_disc AS "Nome da Disciplina",
@@ -138,13 +138,13 @@ JOIN profere ON profere.id_prof = p.id_prof
 JOIN disciplina d ON d.id_disc = profere.id_disc
 WHERE p.id_prof = '1'
 
-10. Encontre os nomes de todos os estudantes.
+10. Encontre os estudantes que cursaram tanto 'Algoritmos e Programação' quanto 'Álgebra Linear'.
 SELECT 
 a.nome AS "Nome do Aluno"
 FROM aluno a
 LIMIT 300
 
-11. Liste os nomes dos estudantes que não cursaram nenhum curso no departamento de "Química"
+11. Liste os nomes dos estudantes que não cursaram nenhum curso no departamento de 'Química'.
 SELECT DISTINCT
     a.nome AS "Nome do Aluno",
     a.ra AS "RA do Aluno"
@@ -162,30 +162,20 @@ WHERE
 ORDER BY
     a.nome
 
-12. 
-SELECT DISTINCT
-    a.nome AS "Nome do Aluno",
-    a.ra AS "RA do Aluno",
-    p.nome AS "Nome do Prof."
-FROM
-    aluno a
-JOIN
-    tcc_aluno ta ON a.ra = ta.ra
-JOIN
-    tcc t ON ta.id_tcc = t.id_tcc
-JOIN
-    professor p ON t.id_prof = p.id_prof
-WHERE
-    p.id_prof IN (
-        SELECT pf.id_prof
-        FROM profere pf
-        JOIN disciplina d ON pf.id_disc = d.id_disc
-        WHERE d.nome_disc = 'Banco de Dados'
-    )
-ORDER BY
-    a.nome
+12. Encontre o número de alunos matriculados em cada curso e liste-os por título de curso.
+ SELECT 
+    c.titulo_curso AS "Curso",
+    COUNT(a.ra) AS "Número de Alunos"
+    FROM 
+        curso c
+    JOIN 
+        aluno a ON c.id_curso = a.id_curso
+    GROUP BY 
+        c.titulo_curso
+    ORDER BY 
+        c.titulo_curso;
 
-13. Recupere os nomes de todos os estudantes que cursaram "Estrutura de Dados" no semestre 2024.1
+13. Recupere os nomes de todos os estudantes que cursaram "Estrutura de Dados" no semestre 2024.1.
 SELECT 
     a.ra AS "RA do Aluno",
     a.nome AS "Nome do Aluno",
@@ -203,7 +193,7 @@ WHERE
 ORDER BY 
     a.nome
 
-14. Recupere os nomes e IDs dos professores que ensinam disciplinas com mais de 30 alunos matriculados
+14. Recupere os nomes e IDs dos professores que ensinam disciplinas com mais de 30 alunos matriculados.
 SELECT 
     p.id_prof AS "ID do Professor",
     p.nome AS "Nome do Professor",
@@ -225,7 +215,7 @@ ORDER BY
     COUNT(e.ra_aluno) DESC
 LIMIT 300
 
-15.Encontre o número de alunos matriculados em cada disciplina e liste-os pelo nome da disciplina
+15.Encontre o número de alunos matriculados em cada disciplina e liste-os pelo nome da disciplina.
 
 SELECT 
     d.nome_disc AS "Disciplina",
