@@ -23,7 +23,7 @@ Com o arquivo queries.py o usuário pode escolher entre as 15 queries requisitad
 ## Como executar:
 
 
-Para o arquivo queries.py basta executar o arquivo python no terminal ou com um IDE de preferência. Depois para navegar o menu basta digitar o número com a query que deseja ver. As queries também estão disponíveis no arquivo Queries do repositório.
+Para o arquivo queries.py basta executar o arquivo python no terminal ou com um IDE de preferência. Depois para navegar o menu basta digitar o número da query que deseja ver. As queries também estão disponíveis no arquivo Queries do repositório em formato de texto.
 
 ![image](https://github.com/user-attachments/assets/bbf3e4b0-7c2e-4934-9f79-43973d281b76)
 
